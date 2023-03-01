@@ -15,7 +15,9 @@
     "start": "node dist/index.js",
     "d:build": "docker build . --platform linux/amd64 -t skeet-worker-solana-transfer",
     "d:tag": "docker tag skeet-worker-solana-transfer eu.gcr.io/skeet-framework/skeet-worker-solana-transfer",
-    "d:push": "docker push eu.gcr.io/skeet-framework/skeet-worker-solana-transfer"
+    "d:push": "docker push eu.gcr.io/skeet-framework/skeet-worker-solana-transfer",
+    "gcp:project": "gcloud config set project skeet-framework",
+    "deploy": "yarn gcp:project && yarn d:build && yarn d:tag && yarn d:push"
   },
   "dependencies": {
     "@google-cloud/tasks": "3.1.1",
