@@ -19,11 +19,15 @@ export type ResponseParam = {
 const FROM_WALLET_SECRET_KEY_STRING =
   process.env.FROM_WALLET_SECRET_KEY_STRING || ''
 
+const SKEET_CLOUD_TASK_QUEUE = 'skeet-api-return-post'
+const SKEET_MUTATION_NAME = 'solanaTokenTransferResult'
+const DEFAULT_RPC_URL = 'https://api.devnet.solana.com'
+
 export const tokenTransfer = async (
   toAddressPubkey: string,
   transferAmountLamport: number,
   tokenMintAddress: string,
-  rpcUrl: string = 'https://api.devnet.solana.com'
+  rpcUrl: string = DEFAULT_RPC_URL
 ) => {
   try {
     const connection = new Connection(rpcUrl, 'confirmed')
@@ -60,7 +64,7 @@ export const tokenTransfer = async (
     )
 
     await sleep(1000)
-    let signature = await transfer(
+    const signature = await transfer(
       connection,
       fromWallet,
       fromTokenAccount.address,
@@ -73,7 +77,7 @@ export const tokenTransfer = async (
       }
     )
     const priceData = await getTokenPrice(tokenMintAddress)
-    const responseParam = {
+    const responseParam: ResponseParam = {
       toAddressPubkey: String(toTokenAccount.address),
       fromAddressPubkey: String(fromTokenAccount.address),
       amountLamport: transferAmountLamport,
@@ -82,12 +86,15 @@ export const tokenTransfer = async (
       usdcPrice: priceData.price,
       timestamp: priceData.timestamp,
     }
-    const queue = 'api-return-post'
-    const mutationName = 'tokenTransferResult'
-    await createCloudTask(queue, mutationName, responseParam)
+
+    await createCloudTask(
+      SKEET_CLOUD_TASK_QUEUE,
+      SKEET_MUTATION_NAME,
+      responseParam
+    )
     return responseParam
   } catch (error) {
-    console.log(`tokenTransfer: ${error}`)
+    console.log(`solanaTokenTransfer: ${error}`)
     throw new Error(JSON.stringify(error))
   }
 }
