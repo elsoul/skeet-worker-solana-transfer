@@ -27,7 +27,7 @@ $ yarn install
 $ yarn dev
 ```
 
-Then Post to http://localhost/run with params.
+Then Post to http://localhost:3000/run with params.
 
 ## Sample Post Param
 
