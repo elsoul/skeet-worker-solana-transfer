@@ -1,19 +1,21 @@
-import { Request, Response } from 'express'
-import { RunParam } from '@/types/api/RunParam'
-import { ResponseParam, tokenTransfer } from '@/lib/tokenTransfer'
+import { Response } from 'express'
+import {
+  SolanaTransferParam,
+  SolanaTransferResponseParam,
+} from '@/types/api/SolanaTransferParam'
+import { tokenTransfer } from '@/lib/tokenTransfer'
 
 export interface TypedRequestBody<T> extends Express.Request {
   body: T
 }
 
-export const run = async (req: TypedRequestBody<RunParam>, res: Response) => {
+export const run = async (
+  req: TypedRequestBody<SolanaTransferParam>,
+  res: Response
+) => {
   try {
-    const reqBody = req.body
-    const responseParam: ResponseParam = await tokenTransfer(
-      reqBody.toAddressPubkey,
-      reqBody.transferAmountLamport,
-      reqBody.tokenMintAddress,
-      reqBody.rpcUrl
+    const responseParam: SolanaTransferResponseParam = await tokenTransfer(
+      req.body
     )
     res.status(200).json({ status: 'success!', responseParam })
   } catch (error) {

@@ -4,41 +4,31 @@ import { Connection, Keypair, PublicKey } from '@solana/web3.js'
 import { getOrCreateAssociatedTokenAccount, transfer } from '@solana/spl-token'
 import { sleep } from '@/utils/time'
 import { getTokenPrice } from '@/lib/birdeyeApi'
-import { createCloudTask } from '@/lib/createCloudTask'
-
-export type ResponseParam = {
-  toAddressPubkey: string
-  fromAddressPubkey: string
-  amountLamport: number
-  tokenMintAddress: string
-  signature: string
-  usdcPrice: number
-  timestamp: string
-}
-
-const FROM_WALLET_SECRET_KEY_STRING =
-  process.env.FROM_WALLET_SECRET_KEY_STRING || ''
+import { createCloudTask, sendPost } from '@/lib/createCloudTask'
+import { decrypt } from '@/lib/crypto'
+import {
+  SolanaTransferParam,
+  SolanaTransferResponseParam,
+} from '@/types/api/SolanaTransferParam'
 
 const SKEET_CLOUD_TASK_QUEUE = 'skeet-api-return-post'
-const SKEET_MUTATION_NAME = 'solanaTokenTransferResult'
-const DEFAULT_RPC_URL = 'https://api.devnet.solana.com'
 
-export const tokenTransfer = async (
-  toAddressPubkey: string,
-  transferAmountLamport: number,
-  tokenMintAddress: string,
-  rpcUrl: string = DEFAULT_RPC_URL
-) => {
+export const tokenTransfer = async (params: SolanaTransferParam) => {
   try {
-    const connection = new Connection(rpcUrl, 'confirmed')
-    const fromWalletKey = FROM_WALLET_SECRET_KEY_STRING.split(',').map((i) =>
-      Number(i)
+    const connection = new Connection(params.rpcUrl, 'confirmed')
+    const decodedFromSecretKeyString = await decrypt(
+      params.encodedFromSecretKeyString,
+      Buffer.from(params.iv, 'base64')
     )
+
+    const fromWalletKey = decodedFromSecretKeyString
+      .split(',')
+      .map((i: string) => Number(i))
     const fromWallet = Keypair.fromSecretKey(
       new Uint8Array(Array.from(fromWalletKey))
     )
-    const toWallet = new PublicKey(toAddressPubkey)
-    const mint = new PublicKey(tokenMintAddress)
+    const toWallet = new PublicKey(params.toAddressPubkey)
+    const mint = new PublicKey(params.tokenMintAddress)
     const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       fromWallet,
@@ -70,28 +60,34 @@ export const tokenTransfer = async (
       fromTokenAccount.address,
       toTokenAccount.address,
       fromWallet.publicKey,
-      transferAmountLamport,
+      params.transferAmountLamport,
       [],
       {
         maxRetries: 5,
       }
     )
-    const priceData = await getTokenPrice(tokenMintAddress)
-    const responseParam: ResponseParam = {
+    const priceData = await getTokenPrice(params.tokenMintAddress)
+    const responseParam: SolanaTransferResponseParam = {
       toAddressPubkey: String(toTokenAccount.address),
       fromAddressPubkey: String(fromTokenAccount.address),
-      amountLamport: transferAmountLamport,
-      tokenMintAddress,
+      transferAmountLamport: params.transferAmountLamport,
+      tokenMintAddress: params.tokenMintAddress,
       signature,
       usdcPrice: priceData.price,
       timestamp: priceData.timestamp,
     }
 
-    await createCloudTask(
-      SKEET_CLOUD_TASK_QUEUE,
-      SKEET_MUTATION_NAME,
-      responseParam
-    )
+    if (process.env.NODE_ENV === 'production') {
+      await createCloudTask(
+        SKEET_CLOUD_TASK_QUEUE,
+        params.returnQueryName,
+        responseParam
+      )
+    } else {
+      const res = await sendPost(params.returnQueryName, responseParam)
+      console.log(res.status)
+    }
+
     return responseParam
   } catch (error) {
     console.log(`solanaTokenTransfer: ${error}`)

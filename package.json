@@ -1,6 +1,6 @@
 {
   "name": "skeet-worker-solana-transfer",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Skeet Worker Plugin Solana Token Transfer",
   "main": "dist/index.js",
   "repository": "https://github.com/elsoul/skeet-worker-solana-transfer.git",
@@ -13,17 +13,20 @@
     "publish": "npm publish",
     "dev": "nodemon",
     "start": "node dist/index.js",
+    "d:login": "cat ./keyfile.json | docker login -u _json_key --password-stdin https://eu.gcr.io",
     "d:build": "docker build . --platform linux/amd64 -t skeet-worker-solana-transfer",
     "d:tag": "docker tag skeet-worker-solana-transfer eu.gcr.io/skeet-framework/skeet-worker-solana-transfer",
     "d:push": "docker push eu.gcr.io/skeet-framework/skeet-worker-solana-transfer",
     "gcp:project": "gcloud config set project skeet-framework",
-    "deploy": "yarn gcp:project && yarn d:build && yarn d:tag && yarn d:push"
+    "deploy": "yarn gcp:project && yarn d:login && yarn d:build && yarn d:tag && yarn d:push",
+    "crypto": "npx ts-node -r tsconfig-paths/register --transpile-only src/lib/crypto.ts"
   },
   "dependencies": {
     "@google-cloud/tasks": "3.1.1",
     "@solana/spl-token": "0.3.7",
     "@solana/web3.js": "1.73.3",
     "body-parser": "1.20.2",
+    "crypto": "1.0.1",
     "dotenv": "16.0.3",
     "express": "4.18.2",
     "jsonwebtoken": "9.0.0",
@@ -48,6 +51,7 @@
     "supertest": "6.3.3",
     "ts-jest": "29.0.5",
     "ts-loader": "9.4.2",
+    "tsconfig-paths": "4.1.2",
     "typescript": "4.9.5"
   }
 }

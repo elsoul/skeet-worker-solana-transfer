@@ -5,7 +5,7 @@ import * as Endpoint from '@/routes'
 
 dotenv.config()
 const skeetEnv = process.env.NODE_ENV || 'development'
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 1112
 
 export const app = express()
 app.use(bodyParser.json())

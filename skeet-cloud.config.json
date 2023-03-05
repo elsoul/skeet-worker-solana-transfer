@@ -1,0 +1,13 @@
+{
+  "api": {
+    "appName": "skeet-worker-solana-transfer",
+    "projectId": "skeet-framework",
+    "region": "europe-west4",
+    "hasLoadBalancer": false,
+    "cloudRun": {},
+    "db": {}
+  },
+  "workers": [],
+  "taskQueues": [],
+  "cloudArmor": []
+}
