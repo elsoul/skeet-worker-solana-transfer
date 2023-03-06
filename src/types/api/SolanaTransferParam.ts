@@ -1,8 +1,3 @@
-export enum GraphQLMethod {
-  query = 'query',
-  mutation = 'mutation',
-}
-
 export type SolanaTransferParam = {
   toAddressPubkey: string
   transferAmountLamport: number

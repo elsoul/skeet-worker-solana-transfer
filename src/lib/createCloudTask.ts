@@ -1,10 +1,10 @@
 import { v2 } from '@google-cloud/tasks'
 import fetch from 'node-fetch'
-import { SolanaTransferResponseParam } from '../types/api/SolanaTransferParam'
+import { SolanaTransferResponseParam } from '@/types/api/SolanaTransferParam'
 
 const { CloudTasksClient } = v2
 const project = process.env.SKEET_GCP_PROJECT_ID || 'skeet-framework'
-const location = process.env.SKEET_TASK_REGION || 'europe-west1'
+const location = process.env.SKEET_GCP_TASK_REGION || 'europe-west1'
 const API_URL = process.env.SKEET_API_URL || ''
 const API_DEV_URL = 'http://localhost:4000/graphql'
 
