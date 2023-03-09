@@ -6,7 +6,7 @@ const { CloudTasksClient } = v2
 const project = process.env.SKEET_GCP_PROJECT_ID || 'skeet-framework'
 const location = process.env.SKEET_GCP_TASK_REGION || 'europe-west1'
 const API_URL = process.env.SKEET_API_URL || ''
-const API_DEV_URL = 'http://localhost:4000/graphql'
+const API_DEV_URL = 'http://host.docker.internal:4000/graphql'
 
 export enum GraphQLMethod {
   query = 'query',
@@ -78,6 +78,6 @@ export const sendPost = async (
     return response
   } catch (e) {
     console.log({ e })
-    throw new Error('sendPost failed:')
+    throw new Error(`sendPost failed: ${e}`)
   }
 }
