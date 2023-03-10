@@ -18,7 +18,6 @@ router.post('/run', Endpoint.run)
 app.use('/', router)
 
 export const expressServer = app.listen(port, async () => {
-  console.log(process.env.SKEET_CRYPTO_SALT)
   console.log(
     `[env:${skeetEnv}]: Server is running at http://localhost:${port}`
   )
