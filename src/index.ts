@@ -2,6 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import * as Endpoint from '@/routes'
+import { getTokenPrice } from './lib/birdeyeApi'
 
 dotenv.config()
 const skeetEnv = process.env.NODE_ENV || 'development'

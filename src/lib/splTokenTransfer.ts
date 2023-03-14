@@ -12,8 +12,9 @@ import {
 } from '@/types/api/SolanaTransferParam'
 
 const SKEET_CLOUD_TASK_QUEUE = 'skeet-api-return-post'
+const LAMPORTS_PER_SPL_TOKEN = 1_000_000
 
-export const tokenTransfer = async (params: SolanaTransferParam) => {
+export const splTokenTransfer = async (params: SolanaTransferParam) => {
   try {
     const connection = new Connection(params.rpcUrl, 'confirmed')
     const decodedFromSecretKeyString = await decrypt(
@@ -66,14 +67,27 @@ export const tokenTransfer = async (params: SolanaTransferParam) => {
         maxRetries: 5,
       }
     )
+    const latestBlockHash = await connection.getLatestBlockhash()
+    await connection.confirmTransaction({
+      blockhash: latestBlockHash.blockhash,
+      lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+      signature,
+    })
+    console.log('SPL Token Transaction signature:', signature)
     const priceData = await getTokenPrice(params.tokenMintAddress)
+    const usdcPrice = Number(
+      (
+        (priceData.price * params.transferAmountLamport) /
+        LAMPORTS_PER_SPL_TOKEN
+      ).toFixed(6)
+    )
     const responseParam: SolanaTransferResponseParam = {
       toAddressPubkey: String(toTokenAccount.address),
       fromAddressPubkey: String(fromTokenAccount.address),
       transferAmountLamport: params.transferAmountLamport,
       tokenMintAddress: params.tokenMintAddress,
       signature,
-      usdcPrice: priceData.price,
+      usdcPrice,
       timestamp: priceData.timestamp,
     }
 
@@ -90,7 +104,7 @@ export const tokenTransfer = async (params: SolanaTransferParam) => {
 
     return responseParam
   } catch (error) {
-    console.log(`solanaTokenTransfer: ${error}`)
+    console.log(`splTokenTransfer: ${error}`)
     throw new Error(JSON.stringify(error))
   }
 }
