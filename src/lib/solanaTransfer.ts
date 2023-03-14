@@ -54,8 +54,8 @@ export const solanaTransfer = async (params: SolanaTransferParam) => {
       ).toFixed(6)
     )
     const responseParam: SolanaTransferResponseParam = {
-      toAddressPubkey: String(params.toAddressPubkey),
-      fromAddressPubkey: String(fromWallet.publicKey),
+      toAddressPubkey: params.toAddressPubkey,
+      fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
       tokenMintAddress: params.tokenMintAddress,
       signature,

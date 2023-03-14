@@ -82,15 +82,14 @@ export const splTokenTransfer = async (params: SolanaTransferParam) => {
       ).toFixed(6)
     )
     const responseParam: SolanaTransferResponseParam = {
-      toAddressPubkey: String(toTokenAccount.address),
-      fromAddressPubkey: String(fromTokenAccount.address),
+      toAddressPubkey: params.toAddressPubkey,
+      fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
       tokenMintAddress: params.tokenMintAddress,
       signature,
       usdcPrice,
       timestamp: priceData.timestamp,
     }
-
     if (process.env.NODE_ENV === 'production') {
       await createCloudTask(
         SKEET_CLOUD_TASK_QUEUE,
