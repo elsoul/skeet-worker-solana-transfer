@@ -2,6 +2,7 @@ export type SolanaTransferParam = {
   toAddressPubkey: string
   transferAmountLamport: number
   tokenMintAddress: string
+  decimal: number
   encodedFromSecretKeyString: string
   returnQueryName: string
   rpcUrl: string

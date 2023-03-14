@@ -12,10 +12,11 @@ import {
 } from '@/types/api/SolanaTransferParam'
 
 const SKEET_CLOUD_TASK_QUEUE = 'skeet-api-return-post'
-const LAMPORTS_PER_SPL_TOKEN = 1_000_000
 
 export const splTokenTransfer = async (params: SolanaTransferParam) => {
   try {
+    console.log(params)
+    const LAMPORTS_PER_SPL_TOKEN = 10 ** params.decimal
     const connection = new Connection(params.rpcUrl, 'confirmed')
     const decodedFromSecretKeyString = await decrypt(
       params.encodedFromSecretKeyString,
