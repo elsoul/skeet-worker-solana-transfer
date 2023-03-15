@@ -8,10 +8,10 @@ const project = process.env.SKEET_GCP_PROJECT_ID || 'skeet-framework'
 const location = process.env.SKEET_GCP_TASK_REGION || 'europe-west1'
 const API_ENDPOINT_URL = process.env.SKEET_API_ENDPOINT_URL || ''
 const API_DEV_URL = 'http://host.docker.internal:4000/graphql'
-
+const DEFAULT_RETURN_MUTATION_NAME = 'solanaTransferReturn'
 export const createCloudTask = async (
   queue: string,
-  mutationName: string,
+  mutationName: string = DEFAULT_RETURN_MUTATION_NAME,
   params: SolanaTransferResponseParam
 ) => {
   try {
@@ -31,7 +31,7 @@ export const createCloudTask = async (
         },
       }
 
-      console.log('Sending task:')
+      console.log(`Sending task: ${queue}`)
 
       // Send create task request.
       const request = { parent: parent, task: task }
@@ -66,7 +66,7 @@ export const genGraphqlRequest = async (
 }
 
 export const sendPost = async (
-  mutationName: string,
+  mutationName: string = DEFAULT_RETURN_MUTATION_NAME,
   params: SolanaTransferResponseParam
 ) => {
   try {
