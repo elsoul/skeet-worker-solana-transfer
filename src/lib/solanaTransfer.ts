@@ -1,7 +1,7 @@
 import {
-  SolanaTransferResponseParam,
-  SolanaTransferParam,
-} from '@/types/api/SolanaTransferParam'
+  SkeetSolanaTransferParam,
+  SkeetSolanaTransferResponse,
+} from '@/types/api/SkeetSolanaTransferTypes'
 import * as solanaWeb3 from '@solana/web3.js'
 import { Keypair, Connection } from '@solana/web3.js'
 import { getTokenPrice } from './birdeyeApi'
@@ -10,7 +10,7 @@ import { decrypt } from './crypto'
 
 const SKEET_CLOUD_TASK_QUEUE = 'skeet-api-return-post'
 
-export const solanaTransfer = async (params: SolanaTransferParam) => {
+export const solanaTransfer = async (params: SkeetSolanaTransferParam) => {
   try {
     const connection = new Connection(params.rpcUrl, 'confirmed')
     const decodedFromSecretKeyString = await decrypt(
@@ -53,7 +53,7 @@ export const solanaTransfer = async (params: SolanaTransferParam) => {
         solanaWeb3.LAMPORTS_PER_SOL
       ).toFixed(6)
     )
-    const responseParam: SolanaTransferResponseParam = {
+    const skeetSolanaTransferResponse: SkeetSolanaTransferResponse = {
       toAddressPubkey: params.toAddressPubkey,
       fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
@@ -63,17 +63,13 @@ export const solanaTransfer = async (params: SolanaTransferParam) => {
       timestamp: priceData.timestamp,
     }
     if (process.env.NODE_ENV === 'production') {
-      await createCloudTask(
-        SKEET_CLOUD_TASK_QUEUE,
-        params.returnQueryName,
-        responseParam
-      )
+      await createCloudTask(SKEET_CLOUD_TASK_QUEUE, skeetSolanaTransferResponse)
     } else {
-      const res = await sendPost(params.returnQueryName, responseParam)
+      const res = await sendPost(skeetSolanaTransferResponse)
       console.log(res.status)
     }
 
-    return responseParam
+    return skeetSolanaTransferResponse
   } catch (error) {
     console.log(`solanaTransfer: ${error}`)
     throw new Error(JSON.stringify(error))

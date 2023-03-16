@@ -1,5 +1,5 @@
 import { Response } from 'express'
-import { SolanaTransferParam } from '@/types/api/SolanaTransferParam'
+import { SkeetSolanaTransferParam } from '@/types/api/SkeetSolanaTransferTypes'
 import { splTokenTransfer } from '@/lib/splTokenTransfer'
 import { solanaTransfer } from '@/lib/solanaTransfer'
 
@@ -8,7 +8,7 @@ export interface TypedRequestBody<T> extends Express.Request {
 }
 
 export const run = async (
-  req: TypedRequestBody<SolanaTransferParam>,
+  req: TypedRequestBody<SkeetSolanaTransferParam>,
   res: Response
 ) => {
   try {

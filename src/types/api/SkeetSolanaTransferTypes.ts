@@ -1,4 +1,4 @@
-export type SolanaTransferParam = {
+export type SkeetSolanaTransferParam = {
   toAddressPubkey: string
   transferAmountLamport: number
   tokenMintAddress: string
@@ -6,10 +6,9 @@ export type SolanaTransferParam = {
   iv: string
   rpcUrl: string
   decimal: number
-  returnQueryName?: string
 }
 
-export type SolanaTransferResponseParam = {
+export type SkeetSolanaTransferResponse = {
   toAddressPubkey: string
   fromAddressPubkey: string
   transferAmountLamport: number

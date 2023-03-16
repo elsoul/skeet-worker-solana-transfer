@@ -7,13 +7,13 @@ import { getTokenPrice } from '@/lib/birdeyeApi'
 import { createCloudTask, sendPost } from '@/lib/createCloudTask'
 import { decrypt } from '@/lib/crypto'
 import {
-  SolanaTransferParam,
-  SolanaTransferResponseParam,
-} from '@/types/api/SolanaTransferParam'
+  SkeetSolanaTransferParam,
+  SkeetSolanaTransferResponse,
+} from '@/types/api/SkeetSolanaTransferTypes'
 
 const SKEET_CLOUD_TASK_QUEUE = 'skeet-api-return-post'
 
-export const splTokenTransfer = async (params: SolanaTransferParam) => {
+export const splTokenTransfer = async (params: SkeetSolanaTransferParam) => {
   try {
     const LAMPORTS_PER_SPL_TOKEN = 10 ** params.decimal
     const connection = new Connection(params.rpcUrl, 'confirmed')
@@ -81,7 +81,7 @@ export const splTokenTransfer = async (params: SolanaTransferParam) => {
         LAMPORTS_PER_SPL_TOKEN
       ).toFixed(6)
     )
-    const responseParam: SolanaTransferResponseParam = {
+    const skeetSolanaTransferResponse: SkeetSolanaTransferResponse = {
       toAddressPubkey: params.toAddressPubkey,
       fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
@@ -91,17 +91,13 @@ export const splTokenTransfer = async (params: SolanaTransferParam) => {
       timestamp: priceData.timestamp,
     }
     if (process.env.NODE_ENV === 'production') {
-      await createCloudTask(
-        SKEET_CLOUD_TASK_QUEUE,
-        params.returnQueryName,
-        responseParam
-      )
+      await createCloudTask(SKEET_CLOUD_TASK_QUEUE, skeetSolanaTransferResponse)
     } else {
-      const res = await sendPost(params.returnQueryName, responseParam)
-      console.log(res.status)
+      const res = await sendPost(skeetSolanaTransferResponse)
+      console.log(await res.json())
     }
 
-    return responseParam
+    return skeetSolanaTransferResponse
   } catch (error) {
     console.log(`splTokenTransfer: ${error}`)
     throw new Error(JSON.stringify(error))

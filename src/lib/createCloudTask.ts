@@ -1,6 +1,6 @@
 import { v2 } from '@google-cloud/tasks'
 import fetch from 'node-fetch'
-import { SolanaTransferResponseParam } from '@/types/api/SolanaTransferParam'
+import { SkeetSolanaTransferResponse } from '@/types/api/SkeetSolanaTransferTypes'
 import encodeBase64 from '@/utils/base64'
 
 const { CloudTasksClient } = v2
@@ -8,14 +8,13 @@ const project = process.env.SKEET_GCP_PROJECT_ID || 'skeet-framework'
 const location = process.env.SKEET_GCP_TASK_REGION || 'europe-west1'
 const API_ENDPOINT_URL = process.env.SKEET_API_ENDPOINT_URL || ''
 const API_DEV_URL = 'http://host.docker.internal:4000/graphql'
-const DEFAULT_RETURN_MUTATION_NAME = 'solanaTransferReturn'
+const DEFAULT_RETURN_MUTATION_NAME = 'saveSkeetSolanaTransfer'
 export const createCloudTask = async (
   queue: string,
-  mutationName: string = DEFAULT_RETURN_MUTATION_NAME,
-  params: SolanaTransferResponseParam
+  params: SkeetSolanaTransferResponse
 ) => {
   try {
-    const graphql = await genGraphqlRequest(mutationName, params)
+    const graphql = await genGraphqlRequest(params)
     const body = await encodeBase64(graphql)
     const client = new CloudTasksClient()
     async function createTask() {
@@ -48,8 +47,7 @@ export const createCloudTask = async (
 }
 
 export const genGraphqlRequest = async (
-  mutationName: string,
-  params: SolanaTransferResponseParam
+  params: SkeetSolanaTransferResponse
 ) => {
   let queryArray: Array<string> = []
   for (const [key, value] of Object.entries(params)) {
@@ -60,17 +58,14 @@ export const genGraphqlRequest = async (
   const strArgs = queryArray.join(' ')
 
   return JSON.stringify({
-    query: `mutation { ${mutationName}(${strArgs})}`,
+    query: `mutation { ${DEFAULT_RETURN_MUTATION_NAME}(${strArgs})}`,
     variables: {},
   })
 }
 
-export const sendPost = async (
-  mutationName: string = DEFAULT_RETURN_MUTATION_NAME,
-  params: SolanaTransferResponseParam
-) => {
+export const sendPost = async (params: SkeetSolanaTransferResponse) => {
   try {
-    const body = await genGraphqlRequest(mutationName, params)
+    const body = await genGraphqlRequest(params)
     const response = await fetch(API_DEV_URL, {
       method: 'POST',
       body,
