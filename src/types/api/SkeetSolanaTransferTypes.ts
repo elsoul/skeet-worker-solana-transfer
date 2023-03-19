@@ -1,4 +1,5 @@
 export type SkeetSolanaTransferParam = {
+  id?: number
   toAddressPubkey: string
   transferAmountLamport: number
   tokenMintAddress: string
@@ -9,6 +10,7 @@ export type SkeetSolanaTransferParam = {
 }
 
 export type SkeetSolanaTransferResponse = {
+  id?: number
   toAddressPubkey: string
   fromAddressPubkey: string
   transferAmountLamport: number
