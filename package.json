@@ -1,6 +1,6 @@
 {
   "name": "skeet-worker-solana-transfer",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "Skeet Worker Plugin Solana Token Transfer",
   "main": "dist/index.js",
   "repository": "https://github.com/elsoul/skeet-worker-solana-transfer.git",

@@ -82,7 +82,7 @@ export const splTokenTransfer = async (params: SkeetSolanaTransferParam) => {
       ).toFixed(6)
     )
     const skeetSolanaTransferResponse: SkeetSolanaTransferResponse = {
-      id: params.id,
+      id: params.id || 1,
       toAddressPubkey: params.toAddressPubkey,
       fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
@@ -95,7 +95,7 @@ export const splTokenTransfer = async (params: SkeetSolanaTransferParam) => {
       await createCloudTask(SKEET_CLOUD_TASK_QUEUE, skeetSolanaTransferResponse)
     } else {
       const res = await sendPost(skeetSolanaTransferResponse)
-      console.log(await res.json())
+      console.log(`API POST Response: ${JSON.stringify(await res.json())}`)
     }
 
     return skeetSolanaTransferResponse

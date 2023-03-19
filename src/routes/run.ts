@@ -7,6 +7,9 @@ export interface TypedRequestBody<T> extends Express.Request {
   body: T
 }
 
+export const SOLANA_TOKEN_ADDRESS =
+  'So11111111111111111111111111111111111111112'
+
 export const run = async (
   req: TypedRequestBody<SkeetSolanaTransferParam>,
   res: Response
@@ -15,11 +18,9 @@ export const run = async (
     let responseParam = {}
     const token = req.body.tokenMintAddress
     switch (token) {
-      case '': {
-        responseParam = await solanaTransfer(req.body)
-        break
-      }
-      case 'So11111111111111111111111111111111111111112': {
+      case undefined:
+      case '':
+      case SOLANA_TOKEN_ADDRESS: {
         responseParam = await solanaTransfer(req.body)
         break
       }

@@ -1,3 +1,4 @@
+import { SOLANA_TOKEN_ADDRESS } from '@/routes'
 import {
   SkeetSolanaTransferParam,
   SkeetSolanaTransferResponse,
@@ -24,8 +25,7 @@ export const solanaTransfer = async (params: SkeetSolanaTransferParam) => {
       new Uint8Array(Array.from(fromWalletKey))
     )
     const toPubkey = new solanaWeb3.PublicKey(params.toAddressPubkey)
-    const rentExemption = await connection.getMinimumBalanceForRentExemption(4)
-    const lamports = rentExemption + params.transferAmountLamport
+    const lamports = params.transferAmountLamport
     let transaction = new solanaWeb3.Transaction().add(
       solanaWeb3.SystemProgram.transfer({
         fromPubkey: fromWallet.publicKey,
@@ -34,6 +34,9 @@ export const solanaTransfer = async (params: SkeetSolanaTransferParam) => {
       })
     )
     transaction.feePayer = fromWallet.publicKey
+    transaction.recentBlockhash = (
+      await connection.getLatestBlockhash()
+    ).blockhash
     const signature = await solanaWeb3.sendAndConfirmTransaction(
       connection,
       transaction,
@@ -46,7 +49,7 @@ export const solanaTransfer = async (params: SkeetSolanaTransferParam) => {
       signature,
     })
     console.log('SOL Transaction signature:', signature)
-    const priceData = await getTokenPrice(params.tokenMintAddress)
+    const priceData = await getTokenPrice(SOLANA_TOKEN_ADDRESS)
     const usdcPrice = Number(
       (
         (priceData.price * params.transferAmountLamport) /
@@ -54,11 +57,11 @@ export const solanaTransfer = async (params: SkeetSolanaTransferParam) => {
       ).toFixed(6)
     )
     const skeetSolanaTransferResponse: SkeetSolanaTransferResponse = {
-      id: params.id,
+      id: params.id || 1,
       toAddressPubkey: params.toAddressPubkey,
       fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
-      tokenMintAddress: params.tokenMintAddress,
+      tokenMintAddress: SOLANA_TOKEN_ADDRESS,
       signature,
       usdcPrice,
       timestamp: priceData.timestamp,
@@ -67,7 +70,7 @@ export const solanaTransfer = async (params: SkeetSolanaTransferParam) => {
       await createCloudTask(SKEET_CLOUD_TASK_QUEUE, skeetSolanaTransferResponse)
     } else {
       const res = await sendPost(skeetSolanaTransferResponse)
-      console.log(res.status)
+      console.log(`API POST Response: ${JSON.stringify(await res.json())}`)
     }
 
     return skeetSolanaTransferResponse
