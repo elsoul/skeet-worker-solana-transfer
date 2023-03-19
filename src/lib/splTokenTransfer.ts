@@ -82,6 +82,7 @@ export const splTokenTransfer = async (params: SkeetSolanaTransferParam) => {
       ).toFixed(6)
     )
     const skeetSolanaTransferResponse: SkeetSolanaTransferResponse = {
+      id: params.id,
       toAddressPubkey: params.toAddressPubkey,
       fromAddressPubkey: fromWallet.publicKey.toBase58(),
       transferAmountLamport: params.transferAmountLamport,
